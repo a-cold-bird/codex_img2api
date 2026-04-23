@@ -1,0 +1,12 @@
+[project]
+name = "img2api"
+version = "0.2.0"
+description = "Image generation API proxy with key pool management"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "python-multipart>=0.0.20",
+    "requests>=2.31.0",
+    "uvicorn>=0.30.0",
+]

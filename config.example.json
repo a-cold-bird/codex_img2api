@@ -1,0 +1,6 @@
+{
+  "auth-key": "replace-with-your-auth-key",
+  "public-base-url": "",
+  "image-ttl-hours": 360,
+  "request-timeout": 300
+}

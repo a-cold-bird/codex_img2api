@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    image: img2api:local
+    container_name: img2api
+    restart: unless-stopped
+    environment:
+      AUTH_KEY: ${AUTH_KEY:-}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      IMAGE_TTL_HOURS: ${IMAGE_TTL_HOURS:-360}
+      IMAGE_CLEANUP_INTERVAL_SECONDS: ${IMAGE_CLEANUP_INTERVAL_SECONDS:-300}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-300}
+    ports:
+      - "9099:9099"
+    volumes:
+      - ./data:/app/data
+      # 如需自定义配置，取消下行注释（需先创建 config.json）
+      # - ./config.json:/app/config.json:ro
