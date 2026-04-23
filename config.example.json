@@ -1,5 +1,5 @@
 {
-  "auth-key": "replace-with-your-auth-key",
+  "auth-key": "img2api",
   "public-base-url": "",
   "image-ttl-hours": 360,
   "request-timeout": 300
