@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const imageModelOptions: Array<{ label: string; value: DrawModel }> = [
+  { label: "gpt-image-2 (随机)", value: "gpt-image-2" },
   { label: "1024×1536 (竖版)", value: "gpt-draw-1024x1536" },
   { label: "1536×1024 (横版)", value: "gpt-draw-1536x1024" },
   { label: "1024×1024 (方形)", value: "gpt-draw-1024x1024" },

@@ -1,7 +1,7 @@
 import { httpRequest } from "@/lib/request";
 
 export type AccountStatus = "正常" | "异常" | "禁用";
-export type DrawModel = "gpt-draw-1024x1024" | "gpt-draw-1024x1536" | "gpt-draw-1536x1024";
+export type DrawModel = "gpt-draw-1024x1024" | "gpt-draw-1024x1536" | "gpt-draw-1536x1024" | "gpt-image-2";
 
 export type Account = {
   id: string;
