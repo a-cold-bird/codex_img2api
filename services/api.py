@@ -427,7 +427,10 @@ def create_app() -> FastAPI:
     async def serve_web(full_path: str):
         asset = resolve_web_asset(full_path)
         if asset is not None:
-            return FileResponse(asset)
+            headers = {}
+            if asset.suffix in {".js", ".css", ".woff", ".woff2", ".ttf", ".png", ".jpg", ".svg", ".ico"}:
+                headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return FileResponse(asset, headers=headers)
         fallback = resolve_web_asset("")
         if fallback is None:
             raise HTTPException(status_code=404, detail="Not Found")
