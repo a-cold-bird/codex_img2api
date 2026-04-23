@@ -185,6 +185,10 @@ img2api/
 └── docker-compose.yml
 ```
 
+## 致谢
+
+Web UI 参考了 [basketikun/chatgpt2api](https://github.com/basketikun/chatgpt2api)。
+
 ## License
 
 MIT
