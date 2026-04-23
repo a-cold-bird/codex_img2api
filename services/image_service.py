@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import random
 import time
 
 import requests
 
 
-SUPPORTED_MODELS = ("gpt-draw-1024x1024", "gpt-draw-1024x1536", "gpt-draw-1536x1024")
+DRAW_MODELS = ("gpt-draw-1024x1024", "gpt-draw-1024x1536", "gpt-draw-1536x1024")
+SUPPORTED_MODELS = (*DRAW_MODELS, "gpt-image-2")
 
 
 class ImageGenerationError(Exception):
@@ -14,8 +16,10 @@ class ImageGenerationError(Exception):
 
 
 def validate_model(model: str) -> str:
-    normalized = str(model or "").strip() or SUPPORTED_MODELS[0]
-    if normalized not in SUPPORTED_MODELS:
+    normalized = str(model or "").strip() or DRAW_MODELS[0]
+    if normalized == "gpt-image-2":
+        normalized = random.choice(DRAW_MODELS)
+    if normalized not in DRAW_MODELS:
         raise ImageGenerationError(f"unsupported model: {normalized}, must be one of {SUPPORTED_MODELS}")
     return normalized
 
