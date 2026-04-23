@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import json
 import random
 import time
@@ -74,79 +73,6 @@ def _parse_responses_sse(resp: requests.Response, prompt: str) -> dict:
     }
 
 
-def _parse_chat_response(resp: requests.Response, prompt: str) -> dict:
-    image_b64 = None
-    revised_prompt = None
-    chunks: list[str] = []
-
-    for line in resp.iter_lines(decode_unicode=True):
-        if not line or not line.startswith("data: "):
-            continue
-        data_str = line[6:]
-        if data_str.strip() == "[DONE]":
-            break
-        try:
-            data = json.loads(data_str)
-        except json.JSONDecodeError:
-            continue
-
-        for choice in data.get("choices", []):
-            delta = choice.get("delta", {})
-            content = delta.get("content")
-            if isinstance(content, str) and content:
-                chunks.append(content)
-            if isinstance(content, list):
-                for part in content:
-                    if isinstance(part, dict):
-                        if part.get("type") == "image_url":
-                            url = (part.get("image_url") or {}).get("url", "")
-                            if url.startswith("data:"):
-                                b64_part = url.split(",", 1)[-1] if "," in url else ""
-                                if b64_part:
-                                    image_b64 = b64_part
-
-    full_content = "".join(chunks)
-
-    if not image_b64 and full_content:
-        try:
-            parsed = json.loads(full_content)
-            if isinstance(parsed, dict):
-                for item in parsed.get("data", []):
-                    b64 = item.get("b64_json", "")
-                    if b64:
-                        image_b64 = b64
-                        revised_prompt = item.get("revised_prompt")
-                        break
-        except (json.JSONDecodeError, TypeError):
-            pass
-
-    if not image_b64:
-        try:
-            full_resp = resp.json() if not chunks else None
-        except Exception:
-            full_resp = None
-        if full_resp:
-            for choice in full_resp.get("choices", []):
-                msg = choice.get("message", {})
-                content = msg.get("content")
-                if isinstance(content, list):
-                    for part in content:
-                        if isinstance(part, dict) and part.get("type") == "image_url":
-                            url = (part.get("image_url") or {}).get("url", "")
-                            if url.startswith("data:"):
-                                b64_part = url.split(",", 1)[-1] if "," in url else ""
-                                if b64_part:
-                                    image_b64 = b64_part
-
-    if not image_b64:
-        raise ImageGenerationError("no image returned from upstream (chat)")
-
-    return {
-        "created": int(time.time()),
-        "data": [{"b64_json": image_b64, "revised_prompt": revised_prompt or prompt}],
-    }
-
-
 def generate_image(
     base_url: str,
     api_key: str,
@@ -166,24 +92,8 @@ def generate_image(
         timeout,
     )
 
-    if resp.status_code == 200:
-        return _parse_responses_sse(resp, prompt)
-
-    if resp.status_code in (404, 405):
-        resp = _do_request(
-            f"{base_url}/v1/chat/completions",
-            api_key,
-            {
-                "model": model,
-                "messages": [{"role": "user", "content": prompt}],
-                "stream": True,
-            },
-            timeout,
-        )
-        if resp.status_code == 200:
-            return _parse_chat_response(resp, prompt)
+    if resp.status_code != 200:
         body = resp.text[:500]
-        raise ImageGenerationError(f"upstream chat returned HTTP {resp.status_code}: {body}")
+        raise ImageGenerationError(f"upstream returned HTTP {resp.status_code}: {body}")
 
-    body = resp.text[:500]
-    raise ImageGenerationError(f"upstream returned HTTP {resp.status_code}: {body}")
+    return _parse_responses_sse(resp, prompt)
