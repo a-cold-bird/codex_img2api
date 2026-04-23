@@ -14,5 +14,4 @@ services:
       - "9099:9099"
     volumes:
       - ./data:/app/data
-      # 如需自定义配置，取消下行注释（需先创建 config.json）
-      # - ./config.json:/app/config.json:ro
+      - ./config.json:/app/config.json:ro
