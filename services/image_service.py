@@ -160,30 +160,30 @@ def generate_image(
         raise ImageGenerationError("prompt is required")
 
     resp = _do_request(
-        f"{base_url}/v1/chat/completions",
+        f"{base_url}/v1/responses",
         api_key,
-        {
-            "model": model,
-            "messages": [{"role": "user", "content": prompt}],
-            "stream": True,
-        },
+        {"model": model, "input": prompt, "stream": True},
         timeout,
     )
 
     if resp.status_code == 200:
-        return _parse_chat_response(resp, prompt)
+        return _parse_responses_sse(resp, prompt)
 
     if resp.status_code in (404, 405):
         resp = _do_request(
-            f"{base_url}/v1/responses",
+            f"{base_url}/v1/chat/completions",
             api_key,
-            {"model": model, "input": prompt, "stream": True},
+            {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": True,
+            },
             timeout,
         )
         if resp.status_code == 200:
-            return _parse_responses_sse(resp, prompt)
+            return _parse_chat_response(resp, prompt)
         body = resp.text[:500]
-        raise ImageGenerationError(f"upstream responses returned HTTP {resp.status_code}: {body}")
+        raise ImageGenerationError(f"upstream chat returned HTTP {resp.status_code}: {body}")
 
     body = resp.text[:500]
     raise ImageGenerationError(f"upstream returned HTTP {resp.status_code}: {body}")
